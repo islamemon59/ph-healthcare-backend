@@ -1,6 +1,11 @@
 import express, { Application, Request, Response } from "express";
 import { prisma } from "./app/lib/prisma";
+import { indexRoutes } from "./app/routes";
 const app: Application = express();
+
+app.use(express.json())
+
+app.use("/api/v1", indexRoutes);
 
 app.get("/", async (req: Request, res: Response) => {
   const result = await prisma.specialty.create({

@@ -6,6 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
+    "generate": "prisma generate",
+    "migrate": "prisma migrate dev",
+    "studio": "prisma studio",
     "lint": "eslint ./src/**/*",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts"
