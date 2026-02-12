@@ -2,20 +2,38 @@
 import { NextFunction, Request, Response } from "express";
 import { envVars } from "../../config/env";
 import status from "http-status";
+import z4 from "zod/v4";
+import { TErrorResponse, TErrorSources } from "../interfaces/error.interface";
+import { handleZodError } from "../errorHelpers/handleZodError";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export const globalErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
+export const globalErrorHandler = (
+  err: any,
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  if (envVars.NODE_ENV === "development") {
+    console.error(err);
+  }
 
-    if(envVars.NODE_ENV === "development") {
-        console.error(err);
-    }
+  const errorSource: TErrorSources[] = [];
+  let statusCode: number = status.INTERNAL_SERVER_ERROR;
+  let message: string = err.message || "Internal Server Error";
 
-    const statusCode: number = status.INTERNAL_SERVER_ERROR;
-    const message: string = err.message || "Internal Server Error";
+  if (err instanceof z4.ZodError) {
+    const simplifiedError = handleZodError(err);
+    statusCode = simplifiedError.statusCode || status.INTERNAL_SERVER_ERROR;
+    message = simplifiedError.message;
+    errorSource.push(...(simplifiedError.errorSource || []));
+  }
 
-   res.status(statusCode).json({
+  const customError: TErrorResponse = {
     success: false,
-    message: message,
-    error: err.message,
-  });
-}
+    message,
+    errorSource,
+    error: envVars.NODE_ENV === "development" ? err.message : undefined,
+  };
+
+  res.status(statusCode).json(customError);
+};
