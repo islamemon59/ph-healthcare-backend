@@ -27,6 +27,7 @@
   "homepage": "https://github.com/islamemon59/ph-healthcare-backend#readme",
   "devDependencies": {
     "@eslint/js": "^9.39.2",
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.2.2",
@@ -41,6 +42,7 @@
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.4.0",
     "better-auth": "^1.4.18",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.4",
     "express": "^5.2.1",
     "gitignore": "^0.7.0",
