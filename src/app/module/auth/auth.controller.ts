@@ -64,14 +64,16 @@ const getNewToken = catchAsync(async (req: Request, res: Response) => {
   const refreshToken = req.cookies.refreshToken;
   const betterAuthSessionToken = req.cookies["better-auth.session_token"];
 
-  console.log("refresh token",refreshToken);
+  console.log("refresh token", refreshToken);
 
   if (!refreshToken || !betterAuthSessionToken) {
     throw new Error("Refresh token not found");
   }
 
-
-  const result = await authService.getNewToken(refreshToken, betterAuthSessionToken);
+  const result = await authService.getNewToken(
+    refreshToken,
+    betterAuthSessionToken,
+  );
   const { newAccessToken, newRefreshToken, token } = result;
   tokenUtils.setAccessTokenCookie(res, newAccessToken);
   tokenUtils.setRefreshTokenCookie(res, newRefreshToken);
@@ -85,9 +87,32 @@ const getNewToken = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const changePassword = catchAsync(async (req: Request, res: Response) => {
+  const payload = req.body;
+  const sessionToken = req.cookies["better-auth.session_token"];
+
+  if (!sessionToken) {
+    throw new Error("Session token not found");
+  }
+
+  const result = await authService.changePassword(payload, sessionToken);
+
+  tokenUtils.setAccessTokenCookie(res, result.accessToken);
+  tokenUtils.setRefreshTokenCookie(res, result.refreshToken);
+  tokenUtils.setBetterAuthSessionCookies(res, result.token as string);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Password changed successfully",
+    data: result,
+  });
+});
+
 export const authController = {
   registerPatient,
   loginPatient,
   getMe,
   getNewToken,
+  changePassword,
 };

@@ -3,6 +3,7 @@ import { jwtUtils } from "./jwt";
 import { envVars } from "../../config/env";
 import { Response } from "express";
 import { cookieUtils } from "./cookie";
+import { bearer } from "better-auth/plugins";
 
 const getAccessToken = (payload: JwtPayload) => {
   const accessToken = jwtUtils.createToken(

@@ -8,12 +8,11 @@ import { IRequestUser } from "../../interfaces/requestUser.interface";
 import { jwtUtils } from "../../utils/jwt";
 import { envVars } from "../../../config/env";
 import { JwtPayload } from "jsonwebtoken";
-
-interface IRegisterPatientPayload {
-  name: string;
-  email: string;
-  password: string;
-}
+import {
+  IChangePasswordPayload,
+  ILoginPatientPayload,
+  IRegisterPatientPayload,
+} from "./auth.interface";
 
 const registerPatient = async (payload: IRegisterPatientPayload) => {
   const { name, email, password } = payload;
@@ -71,7 +70,7 @@ const registerPatient = async (payload: IRegisterPatientPayload) => {
   }
 };
 
-const loginPatient = async (payload: IRegisterPatientPayload) => {
+const loginPatient = async (payload: ILoginPatientPayload) => {
   const { email, password } = payload;
 
   const data = await auth.api.signInEmail({
@@ -176,7 +175,7 @@ const getNewToken = async (refreshToken: string, sessionToken: string) => {
     where: { token: sessionToken },
     data: {
       token: sessionToken,
-      expiresAt: new Date(Date.now() + 60  * 60 * 24 * 1000),
+      expiresAt: new Date(Date.now() + 60 * 60 * 24 * 1000),
       updatedAt: new Date(),
     },
   });
@@ -194,9 +193,60 @@ const getNewToken = async (refreshToken: string, sessionToken: string) => {
   return { newAccessToken, newRefreshToken, token };
 };
 
+const changePassword = async (
+  payload: IChangePasswordPayload,
+  sessionToken: string,
+) => {
+  const session = await auth.api.getSession({
+    headers: {
+      Authorization: `Bearer ${sessionToken}`,
+    },
+  });
+
+  if (!session) {
+    throw new AppError(status.UNAUTHORIZED, "Invalid session token");
+  }
+
+  const { oldPassword, newPassword } = payload;
+
+  const result = await auth.api.changePassword({
+    body: {
+      currentPassword: oldPassword,
+      newPassword,
+      revokeOtherSessions: true,
+    },
+    headers: {
+      Authorization: `Bearer ${sessionToken}`,
+    },
+  });
+
+  const accessToken = tokenUtils.getAccessToken({
+    name: result.user.name,
+    email: result.user.email,
+    role: result.user.role,
+    status: result.user.status,
+    isDeleted: result.user.isDeleted,
+    emailVerified: result.user.emailVerified,
+    userId: result.user.id,
+  });
+
+  const refreshToken = tokenUtils.getRefreshToken({
+    name: result.user.name,
+    email: result.user.email,
+    role: result.user.role,
+    status: result.user.status,
+    isDeleted: result.user.isDeleted,
+    emailVerified: result.user.emailVerified,
+    userId: result.user.id,
+  });
+
+  return { ...result, accessToken, refreshToken };
+};
+
 export const authService = {
   registerPatient,
   loginPatient,
   getMe,
   getNewToken,
+  changePassword,
 };
