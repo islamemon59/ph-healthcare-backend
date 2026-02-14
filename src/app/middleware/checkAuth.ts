@@ -23,7 +23,7 @@ export const checkAuth = (...authRoles: Role[]) => {
       }
 
       if (sessionToken) {
-        const sessionExists = await prisma.session.findUnique({
+        const sessionExists = await prisma.session.findFirst({
           where: {
             token: sessionToken,
             expiresAt: {
@@ -72,6 +72,12 @@ export const checkAuth = (...authRoles: Role[]) => {
               "User does not have required role",
             );
           }
+
+          req.user = {
+            userId: user.id,
+            email: user.email,
+            role: user.role,
+          };
         }
       }
 
