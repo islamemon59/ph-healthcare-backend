@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import status from "http-status";
 import { UserStatus } from "../../../generated/prisma/enums";
 import AppError from "../../errorHelpers/AppError";
@@ -360,6 +361,38 @@ const resetPassword = async (
   });
 };
 
+const googleLoginSuccess = async (session: Record<string, any>) => {
+  const isPatientExists = await prisma.patient.findUnique({
+    where: {
+      userId: session.user.id,
+    },
+  });
+
+  if (!isPatientExists) {
+    await prisma.patient.create({
+      data: {
+        userId: session.user.id,
+        name: session.user.name,
+        email: session.user.email,
+      },
+    });
+  }
+
+  const accessToken = tokenUtils.getAccessToken({
+    name: session.user.name,
+    email: session.user.email,
+    role: session.user.role,
+  });
+
+  const refreshToken = tokenUtils.getRefreshToken({
+    name: session.user.name,
+    email: session.user.email,
+    role: session.user.role,
+  });
+
+  return { accessToken, refreshToken };
+};
+
 export const authService = {
   registerPatient,
   loginPatient,
@@ -370,4 +403,5 @@ export const authService = {
   verifyEmail,
   forgetPassword,
   resetPassword,
+  googleLoginSuccess,
 };
