@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export interface SendEmailOptions {
   to: string;
   subject: string;
