@@ -6,9 +6,10 @@ import z4 from "zod/v4";
 import { TErrorResponse, TErrorSources } from "../interfaces/error.interface";
 import { handleZodError } from "../errorHelpers/handleZodError";
 import AppError from "../errorHelpers/AppError";
+import { deleteFileFromCloudinary } from "../../config/cloudinary.config";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export const globalErrorHandler = (
+export const globalErrorHandler = async (
   err: any,
   req: Request,
   res: Response,
@@ -16,6 +17,16 @@ export const globalErrorHandler = (
 ) => {
   if (envVars.NODE_ENV === "development") {
     console.error(err);
+  }
+
+  if (req.file) {
+    await deleteFileFromCloudinary(req.file.path);
+  }
+
+  if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+    for (const file of req.files) {
+      await Promise.all([deleteFileFromCloudinary(file.path)]);
+    }
   }
 
   let errorSource: TErrorSources[] = [];
