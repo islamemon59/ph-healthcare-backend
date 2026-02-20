@@ -44,7 +44,7 @@ export interface IQueryConfig {
   filterableFields?: string[];
 }
 
-export interface PrismaStringFilter{
+export interface PrismaStringFilter {
   contains?: string;
   endsWith?: string;
   equals?: string;
@@ -59,8 +59,7 @@ export interface PrismaStringFilter{
   startsWith?: string;
 }
 
-
-export interface PrismaNumberFilter{
+export interface PrismaNumberFilter {
   equals?: number;
   gt?: number;
   gte?: number;
@@ -71,14 +70,24 @@ export interface PrismaNumberFilter{
   notIn?: number[];
 }
 
-export interface PrismaBooleanFilter{
+export interface PrismaBooleanFilter {
   equals?: boolean;
-  not?: boolean;  
+  not?: boolean;
 }
 
-export interface PrismaWhereConditions{
+export interface PrismaWhereConditions {
   OR?: Record<string, unknown>[];
   AND?: Record<string, unknown>[];
   NOT?: Record<string, unknown>[];
   [key: string]: unknown;
+}
+
+export interface IQueryResult<T> {
+  data: T[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
