@@ -1937,8 +1937,6 @@ export const ScheduleScalarFieldEnum = {
   id: 'id',
   startDate: 'startDate',
   endDate: 'endDate',
-  StartTime: 'StartTime',
-  EndTime: 'EndTime',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

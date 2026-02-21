@@ -159,54 +159,6 @@ export class QueryBuilder<
           queryRelation[nestedField] = this.parseFilterValue(value);
           countRelation[nestedField] = this.parseFilterValue(value);
           return;
-        } else if (parts.length === 3) {
-          const [relation, nestedRelation, nestedField] = parts;
-
-          if (!queryWhere[relation]) {
-            queryWhere[relation] = {
-              some: {},
-            };
-            countQueryWhere[relation] = {
-              some: {},
-            };
-          }
-
-          const queryRelation = queryWhere[relation] as Record<string, unknown>;
-          const countRelation = countQueryWhere[relation] as Record<
-            string,
-            unknown
-          >;
-
-          if (!queryRelation.some) {
-            queryRelation.some = {};
-          }
-          if (!countRelation.some) {
-            countRelation.some = {};
-          }
-
-          const querySome = queryRelation.some as Record<string, unknown>;
-          const countSome = countRelation.some as Record<string, unknown>;
-
-          if (!querySome[nestedRelation]) {
-            querySome[nestedRelation] = {};
-          }
-          if (!countSome[nestedRelation]) {
-            countSome[nestedRelation] = {};
-          }
-
-          const queryNestedRelation = querySome[nestedRelation] as Record<
-            string,
-            unknown
-          >;
-          const countNestedRelation = countSome[nestedRelation] as Record<
-            string,
-            unknown
-          >;
-
-          queryNestedRelation[nestedField] = this.parseFilterValue(value);
-          countNestedRelation[nestedField] = this.parseFilterValue(value);
-
-          return;
         }
       }
 
