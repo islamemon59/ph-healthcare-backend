@@ -18,6 +18,15 @@ app.set("query parser", (str: string) => qs.parse(str));
 app.set("view engine", "ejs");
 app.set("views", path.resolve(process.cwd(), `src/app/templates`));
 
+app.post(
+  "/webhook",
+  express.raw({ type: "application/json" }),
+  async (req: Request, res: Response) => {
+    console.log("webhook received", req.body);
+    res.status(200).json({ success: true });
+  },
+);
+
 app.use(
   cors({
     origin: [envVars.FRONTED_URL, envVars.BETTER_AUTH_URL],

@@ -11,7 +11,8 @@
     "studio": "prisma studio",
     "lint": "eslint ./src/**/*",
     "start": "node dist/server.js",
-    "dev": "tsx watch src/server.ts"
+    "dev": "tsx watch src/server.ts",
+    "stripe:webhook": "stripe listen --forward-to localhost:5000/webhook"
   },
   "repository": {
     "type": "git",
@@ -60,6 +61,7 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^8.0.1",
-    "qs": "^6.15.0"
+    "qs": "^6.15.0",
+    "stripe": "^20.3.1"
   }
 }
