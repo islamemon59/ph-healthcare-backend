@@ -10,6 +10,7 @@ import path from "path";
 import { envVars } from "./config/env";
 import cors from "cors";
 import qs from "qs";
+import { PaymentController } from "./app/module/payment/payment.controller";
 
 const app: Application = express();
 
@@ -21,10 +22,7 @@ app.set("views", path.resolve(process.cwd(), `src/app/templates`));
 app.post(
   "/webhook",
   express.raw({ type: "application/json" }),
-  async (req: Request, res: Response) => {
-    console.log("webhook received", req.body);
-    res.status(200).json({ success: true });
-  },
+  PaymentController.handleStripeWebhookEvent,
 );
 
 app.use(
