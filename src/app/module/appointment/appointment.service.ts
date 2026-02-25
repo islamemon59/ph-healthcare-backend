@@ -1,4 +1,3 @@
-
 import { IRequestUser } from "../../interfaces/requestUser.interface";
 import { prisma } from "../../lib/prisma";
 import { IBookAppointmentPayload } from "./appointment.interface";
@@ -91,7 +90,7 @@ const bookAppointment = async (
             product_data: {
               name: "Appointment with Dr. " + doctorData.name,
             },
-            unit_amount: doctorData.appointmentFee,
+            unit_amount: doctorData.appointmentFee * 100,
           },
           quantity: 1,
         },
