@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import express, { Application, Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import { prisma } from "./app/lib/prisma";
@@ -11,6 +12,8 @@ import { envVars } from "./config/env";
 import cors from "cors";
 import qs from "qs";
 import { PaymentController } from "./app/module/payment/payment.controller";
+import cron from "node-cron";
+import { AppointmentService } from "./app/module/appointment/appointment.service";
 
 const app: Application = express();
 
@@ -41,6 +44,18 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+
+cron.schedule("*/25 * * * *", async () => {
+  try {
+    await AppointmentService.cancelUnpaidAppointments();
+    console.log("Unpaid appointments canceled successfully");
+  } catch (error: any) {
+    console.error(
+      "Error occurred while canceling unpaid appointments:",
+      error.message,
+    );
+  }
+});
 
 app.use("/api/v1", indexRoutes);
 
