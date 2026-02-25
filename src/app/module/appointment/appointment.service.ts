@@ -1,9 +1,10 @@
-import { uuidv7 } from "better-auth";
+
 import { IRequestUser } from "../../interfaces/requestUser.interface";
 import { prisma } from "../../lib/prisma";
 import { IBookAppointmentPayload } from "./appointment.interface";
 import { stripe } from "../../../config/stripe.config";
 import { envVars } from "../../../config/env";
+import { v7 as uuidv7 } from "uuid";
 import {
   AppointmentStatus,
   PaymentStatus,
