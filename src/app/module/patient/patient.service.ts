@@ -6,7 +6,7 @@ import {
   IUpdatePatientProfilePayload,
 } from "./patient.interface";
 import { convertToDateTime } from "./patient.utils";
-
+//update profile
 const updateMyProfile = async (
   user: IRequestUser,
   payload: IUpdatePatientProfilePayload,
