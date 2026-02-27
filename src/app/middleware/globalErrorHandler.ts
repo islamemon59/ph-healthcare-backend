@@ -7,6 +7,7 @@ import { TErrorResponse, TErrorSources } from "../interfaces/error.interface";
 import { handleZodError } from "../errorHelpers/handleZodError";
 import AppError from "../errorHelpers/AppError";
 import { deleteFileFromCloudinary } from "../../config/cloudinary.config";
+import { deleteUploadedFilesFromGlobalErrorHandler } from "../utils/deleteUploadedFilesFromGlobalErrorHandler";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const globalErrorHandler = async (
@@ -19,15 +20,7 @@ export const globalErrorHandler = async (
     console.error(err);
   }
 
-  if (req.file) {
-    await deleteFileFromCloudinary(req.file.path);
-  }
-
-  if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-    for (const file of req.files) {
-      await Promise.all([deleteFileFromCloudinary(file.path)]);
-    }
-  }
+  await deleteUploadedFilesFromGlobalErrorHandler(req);
 
   let errorSource: TErrorSources[] = [];
   let statusCode: number = status.INTERNAL_SERVER_ERROR;
