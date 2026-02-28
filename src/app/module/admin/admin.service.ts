@@ -1,9 +1,13 @@
 import status from "http-status";
-import { UserStatus } from "../../../generated/prisma/enums";
+import { Role, UserStatus } from "../../../generated/prisma/enums";
 import AppError from "../../errorHelpers/AppError";
 import { IRequestUser } from "../../interfaces/requestUser.interface";
 import { prisma } from "../../lib/prisma";
-import { IUpdateAdminPayload } from "./admin.interface";
+import {
+  IChangeUserRolePayload,
+  IChangeUserStatusPayload,
+  IUpdateAdminPayload,
+} from "./admin.interface";
 
 const getAllAdmins = async () => {
   const admins = await prisma.admin.findMany({
@@ -27,7 +31,6 @@ const getAdminById = async (id: string) => {
 };
 
 const updateAdmin = async (id: string, payload: IUpdateAdminPayload) => {
-
   const isAdminExist = await prisma.admin.findUnique({
     where: {
       id,
@@ -54,7 +57,6 @@ const updateAdmin = async (id: string, payload: IUpdateAdminPayload) => {
 
 //soft delete admin user by setting isDeleted to true and also delete the user session and account
 const deleteAdmin = async (id: string, user: IRequestUser) => {
-
   const isAdminExist = await prisma.admin.findUnique({
     where: {
       id,
@@ -103,9 +105,123 @@ const deleteAdmin = async (id: string, user: IRequestUser) => {
   return result;
 };
 
+const changeUserStatus = async (
+  user: IRequestUser,
+  payload: IChangeUserStatusPayload,
+) => {
+  const { userId, userStatus } = payload;
+
+  const isAdminExists = await prisma.admin.findFirstOrThrow({
+    where: {
+      email: user.email,
+    },
+    include: {
+      user: true,
+    },
+  });
+
+  const userToChangeStatus = await prisma.user.findFirstOrThrow({
+    where: {
+      id: userId,
+    },
+  });
+
+  const selfStatusChange = isAdminExists.id === user.userId;
+
+  if (selfStatusChange) {
+    throw new AppError(status.BAD_REQUEST, "You cannot change your own status");
+  }
+
+  if (
+    isAdminExists.user.role === Role.ADMIN &&
+    userToChangeStatus.role === Role.SUPER_ADMIN
+  ) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      "You cannot change super admin status",
+    );
+  }
+
+  if (
+    isAdminExists.user.role === Role.SUPER_ADMIN &&
+    userToChangeStatus.role === Role.ADMIN
+  ) {
+    throw new AppError(status.BAD_REQUEST, "You cannot change admin status");
+  }
+
+  if (userStatus === UserStatus.DELETED) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      "You cannot set user status to deleted. To delete a user, you have to use role specific delete api. For example, to delete an doctor user, you have to use delete doctor api which will set the user status to deleted and also set isDeleted to true and also delete the user session and account",
+    );
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      status: userStatus,
+    },
+  });
+
+  return updatedUser;
+};
+
+const changeUserRole = async (
+  user: IRequestUser,
+  payload: IChangeUserRolePayload,
+) => {
+  const { userId, role } = payload;
+
+  const isSuperAdminExists = await prisma.admin.findFirstOrThrow({
+    where: {
+      email: user.email,
+    },
+    include: {
+      user: true,
+    },
+  });
+
+  const userToChangeRole = await prisma.user.findFirstOrThrow({
+    where: {
+      id: userId,
+    },
+  });
+
+  const selfRoleChange = isSuperAdminExists.id === user.userId;
+
+  if (selfRoleChange) {
+    throw new AppError(status.BAD_REQUEST, "You cannot change your own role");
+  }
+
+  if (
+    userToChangeRole.role === Role.DOCTOR ||
+    userToChangeRole.role === Role.PATIENT
+  ) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      "You cannot change the role of doctor or patient user. If you want to change the role of doctor or patient user, you have to delete the user and recreate with new role",
+    );
+  }
+
+  const updateUser = await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      role,
+    },
+  });
+
+  return updateUser;
+};
+
 export const AdminService = {
   getAllAdmins,
   getAdminById,
   updateAdmin,
   deleteAdmin,
+  changeUserStatus,
+  changeUserRole,
 };
