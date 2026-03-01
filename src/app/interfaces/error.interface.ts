@@ -4,10 +4,10 @@ export interface TErrorSources {
 }
 
 export interface TErrorResponse {
-    statusCode?: number;
+  statusCode?: number;
   success: boolean;
   message: string;
-  errorSource?: TErrorSources[];
+  errorSources: TErrorSources[];
   stack?: string;
   error?: string;
 }
